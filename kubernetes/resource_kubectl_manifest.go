@@ -161,7 +161,7 @@ metadata:
 				}
 				// set fields captured normally during creation/updates
 				d.SetId(selfLink)
-				_ = d.Set("api_version", metaObjLive.GetAPIVersion())
+				//_ = d.Set("api_version", metaObjLive.GetAPIVersion())
 				_ = d.Set("kind", metaObjLive.GetKind())
 				_ = d.Set("namespace", metaObjLive.GetNamespace())
 				_ = d.Set("name", metaObjLive.GetName())
@@ -212,7 +212,7 @@ metadata:
 			}
 
 			// set calculated fields based on parsed yaml values
-			_ = d.SetNew("api_version", parsedYaml.unstruct.GetAPIVersion())
+			//_ = d.SetNew("api_version", parsedYaml.unstruct.GetAPIVersion())
 			_ = d.SetNew("kind", parsedYaml.unstruct.GetKind())
 			_ = d.SetNew("namespace", parsedYaml.unstruct.GetNamespace())
 			_ = d.SetNew("name", parsedYaml.unstruct.GetName())
