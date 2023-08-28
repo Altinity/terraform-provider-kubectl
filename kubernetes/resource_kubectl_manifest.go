@@ -303,7 +303,7 @@ metadata:
 			return nil
 		},
 		Schema:        kubectlManifestSchema,
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Version: 0,
@@ -314,6 +314,19 @@ metadata:
 					return rawState, nil
 				},
 			},
+			{
+				Version: 1,
+				Type:    resourceKubectlManifestV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: func(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+					if val, found := rawState["force_conflicts"]; !found || val == nil {
+						rawState["force_conflicts"] = false
+					}
+					if val, found := rawState["apply_only"]; !found || val == nil {
+						rawState["apply_only"] = false
+					}
+					return rawState, nil
+				},
+			},			
 		},
 	}
 }
