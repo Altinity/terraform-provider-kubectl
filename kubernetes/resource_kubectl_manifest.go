@@ -313,6 +313,13 @@ metadata:
 					return rawState, nil
 				},
 			},
+			{
+				Version: 1,
+				Type:    resourceKubectlManifestV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: func(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+					return rawState, nil
+				},
+			},
 		},
 	}
 }
