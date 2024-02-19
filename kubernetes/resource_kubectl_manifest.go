@@ -303,7 +303,7 @@ metadata:
 			return nil
 		},
 		Schema:        kubectlManifestSchema,
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Version: 0,
