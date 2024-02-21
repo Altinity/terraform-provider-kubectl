@@ -2,9 +2,10 @@ package yaml
 
 import (
 	"fmt"
+	"strings"
+
 	meta_v1_unstruct "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	yamlWriter "sigs.k8s.io/yaml"
-	"strings"
 )
 
 type Manifest struct {
@@ -34,6 +35,9 @@ func (m *Manifest) GetNamespace() string {
 }
 
 func (m *Manifest) SetNamespace(namespace string) {
+	if strings.HasPrefix(strings.ToLower(m.GetKind()), "cluster") {
+		return
+	}
 	m.Raw.SetNamespace(namespace)
 }
 
@@ -55,7 +59,8 @@ func (m *Manifest) GetSelfLink() string {
 }
 
 // buildSelfLink creates a selfLink of the form:
-//     "/apis/<apiVersion>/namespaces/<namespace>/<kind>s/<name>"
+//
+//	"/apis/<apiVersion>/namespaces/<namespace>/<kind>s/<name>"
 //
 // The selfLink attribute is not available in Kubernetes 1.20+ so we need
 // to generate a consistent, unique ID for our Terraform resources.

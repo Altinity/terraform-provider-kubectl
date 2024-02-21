@@ -188,6 +188,9 @@ metadata:
 				_ = d.Set("force_new", false)
 				_ = d.Set("server_side_apply", false)
 				_ = d.Set("apply_only", false)
+				_ = d.Set("force_conflicts", false)
+				_ = d.Set("validate_schema", true)
+				_ = d.Set("wait_for_rollout", true)
 
 				// clear out fields user can't set to try and get parity with yaml_body
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "creationTimestamp")
@@ -195,6 +198,11 @@ metadata:
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "selfLink")
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "uid")
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "annotations", "kubectl.kubernetes.io/last-applied-configuration")
+				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "annotations", "deployment.kubernetes.io/revision")
+				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "managedFields")
+				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "generation")
+				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "status")
+				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "spec", "template", "metadata", "creationTimestamp")
 
 				if len(metaObjLive.Raw.GetAnnotations()) == 0 {
 					meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "annotations")
