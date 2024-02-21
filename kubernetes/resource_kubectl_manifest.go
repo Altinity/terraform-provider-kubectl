@@ -4,19 +4,19 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"sort"
+	"strings"
+	"time"
+
 	"github.com/gavinbunney/terraform-provider-kubectl/flatten"
 	"github.com/gavinbunney/terraform-provider-kubectl/yaml"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"io/ioutil"
 	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/kubectl/pkg/validation"
-	"os"
-	"sort"
-	"time"
-
-	"log"
-	"strings"
 
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	k8sresource "k8s.io/cli-runtime/pkg/resource"
@@ -24,7 +24,7 @@ import (
 	"k8s.io/kubectl/pkg/cmd/apply"
 	k8sdelete "k8s.io/kubectl/pkg/cmd/delete"
 
-	backoff "github.com/cenkalti/backoff/v4"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	apps_v1 "k8s.io/api/apps/v1"
@@ -964,4 +964,5 @@ var kubernetesControlFields = []string{
 	"metadata.resourceVersion",
 	"metadata.uid",
 	"metadata.annotations.kubectl.kubernetes.io/last-applied-configuration",
+	"metadata.managedFields",
 }

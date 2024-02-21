@@ -108,6 +108,7 @@ By default, the following control fields are ignored:
   - `metadata.resourceVersion`
   - `metadata.uid`
   - `metadata.annotations.kubectl.kubernetes.io/last-applied-configuration`
+  - `metadata.managedFields`
 
 These syntax matches the Terraform style flattened-map syntax, whereby keys are separated by `.` paths.
 
