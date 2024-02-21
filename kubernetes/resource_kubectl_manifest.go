@@ -182,9 +182,7 @@ metadata:
 				d.SetId(metaObjLive.GetSelfLink())
 				_ = d.Set("api_version", metaObjLive.GetAPIVersion())
 				_ = d.Set("kind", metaObjLive.GetKind())
-				if !metaObjLive.IsClusterScoped() {
-					_ = d.Set("namespace", metaObjLive.GetNamespace())
-				}
+				_ = d.Set("namespace", metaObjLive.GetNamespace())
 				_ = d.Set("name", metaObjLive.GetName())
 				_ = d.Set("force_new", false)
 				_ = d.Set("server_side_apply", false)
@@ -204,6 +202,31 @@ metadata:
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "generation")
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "status")
 				meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "spec", "template", "metadata", "creationTimestamp")
+				if metaObjLive.IsClusterScoped() {
+					meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "namespace")
+				}
+
+				// reintroduce dynamic fields
+				var fieldsToTrim []string
+				switch metaObjLive.GetKind() {
+				case "Service":
+					fieldsToTrim = append(fieldsToTrim,
+						"spec.clusterIP",
+						"spec.clusterIPs",
+						"spec.ipFamilies",
+						"spec.ipFamilyPolicy",
+						"spec.internalTrafficPolicy",
+						"spec.sessionAffinity",
+						"spec.type",
+					)
+				case "ServiceAccount":
+					fieldsToTrim = append(fieldsToTrim,
+						"secrets",
+					)
+				}
+				for _, field := range fieldsToTrim {
+					meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, strings.Split(field, ".")...)
+				}
 
 				if len(metaObjLive.Raw.GetAnnotations()) == 0 {
 					meta_v1_unstruct.RemoveNestedField(metaObjLive.Raw.Object, "metadata", "annotations")
@@ -257,7 +280,7 @@ metadata:
 				obfuscatedYaml.Raw.Object = make(map[string]interface{})
 			}
 
-			if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !parsedYaml.IsClusterScoped() {
+			if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
 				obfuscatedYaml.SetNamespace(overrideNamespace.(string))
 			}
 
