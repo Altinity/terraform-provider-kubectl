@@ -35,9 +35,6 @@ func (m *Manifest) GetNamespace() string {
 }
 
 func (m *Manifest) SetNamespace(namespace string) {
-	if strings.HasPrefix(strings.ToLower(m.GetKind()), "cluster") {
-		return
-	}
 	m.Raw.SetNamespace(namespace)
 }
 
@@ -47,6 +44,10 @@ func (m *Manifest) HasNamespace() bool {
 
 func (m *Manifest) GetUID() string {
 	return fmt.Sprintf("%v", m.Raw.GetUID())
+}
+
+func (m *Manifest) IsClusterScoped() bool {
+	return !m.HasNamespace() || strings.HasPrefix(m.GetKind(), "Cluster")
 }
 
 func (m *Manifest) GetSelfLink() string {

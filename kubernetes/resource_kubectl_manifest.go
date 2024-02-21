@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sort"
@@ -183,7 +182,9 @@ metadata:
 				d.SetId(metaObjLive.GetSelfLink())
 				_ = d.Set("api_version", metaObjLive.GetAPIVersion())
 				_ = d.Set("kind", metaObjLive.GetKind())
-				_ = d.Set("namespace", metaObjLive.GetNamespace())
+				if !metaObjLive.IsClusterScoped() {
+					_ = d.Set("namespace", metaObjLive.GetNamespace())
+				}
 				_ = d.Set("name", metaObjLive.GetName())
 				_ = d.Set("force_new", false)
 				_ = d.Set("server_side_apply", false)
@@ -236,14 +237,16 @@ metadata:
 				return err
 			}
 
-			if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
+			if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !parsedYaml.IsClusterScoped() {
 				parsedYaml.SetNamespace(overrideNamespace.(string))
 			}
 
 			// set calculated fields based on parsed yaml values
 			_ = d.SetNew("api_version", parsedYaml.GetAPIVersion())
 			_ = d.SetNew("kind", parsedYaml.GetKind())
-			_ = d.SetNew("namespace", parsedYaml.GetNamespace())
+			if !parsedYaml.IsClusterScoped() {
+				_ = d.SetNew("namespace", parsedYaml.GetNamespace())
+			}
 			_ = d.SetNew("name", parsedYaml.GetName())
 
 			// set the yaml_body_parsed field to provided value and obfuscate the yaml_body values manually
@@ -254,7 +257,7 @@ metadata:
 				obfuscatedYaml.Raw.Object = make(map[string]interface{})
 			}
 
-			if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
+			if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !parsedYaml.IsClusterScoped() {
 				obfuscatedYaml.SetNamespace(overrideNamespace.(string))
 			}
 
@@ -458,7 +461,7 @@ func resourceKubectlManifestApply(ctx context.Context, d *schema.ResourceData, m
 		return fmt.Errorf("failed to parse kubernetes resource: %+v", err)
 	}
 
-	if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
+	if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !manifest.IsClusterScoped() {
 		manifest.SetNamespace(overrideNamespace.(string))
 	}
 
@@ -477,7 +480,7 @@ func resourceKubectlManifestApply(ctx context.Context, d *schema.ResourceData, m
 		return fmt.Errorf("%v failed to convert to yaml: %+v", manifest, err)
 	}
 
-	tmpfile, _ := ioutil.TempFile("", "*kubectl_manifest.yaml")
+	tmpfile, _ := os.CreateTemp("", "*kubectl_manifest.yaml")
 	_, _ = tmpfile.Write([]byte(yamlBody))
 	_ = tmpfile.Close()
 
@@ -575,7 +578,7 @@ func resourceKubectlManifestRead(ctx context.Context, d *schema.ResourceData, me
 		return fmt.Errorf("failed to parse kubernetes resource: %+v", err)
 	}
 
-	if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
+	if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !manifest.IsClusterScoped() {
 		manifest.SetNamespace(overrideNamespace.(string))
 	}
 
@@ -637,7 +640,7 @@ func resourceKubectlManifestDelete(ctx context.Context, d *schema.ResourceData, 
 		return fmt.Errorf("failed to parse kubernetes resource: %+v", err)
 	}
 
-	if overrideNamespace, ok := d.GetOk("override_namespace"); ok {
+	if overrideNamespace, ok := d.GetOk("override_namespace"); ok && !manifest.IsClusterScoped() {
 		manifest.SetNamespace(overrideNamespace.(string))
 	}
 
